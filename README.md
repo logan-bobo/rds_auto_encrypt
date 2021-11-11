@@ -5,7 +5,6 @@ Currently it is a strenious process to encrypt an unencrypted RDS instance. This
 
 
 ## The following actions are taken
-
  - Snapshot your desired instance
  - Name the snapshot
  - Copy the snapshot to the region your RDS instance currently exists in
@@ -16,5 +15,38 @@ Currently it is a strenious process to encrypt an unencrypted RDS instance. This
  - Remove the old RDS instance
 
 Where you once had an unencrypted RDS instance is a newly created, encrypted instance that is a replica of the origonal and all of the data held. 
+
+## Getting Started
+A dependency of this script is having the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) configured with your credentials in `~/.aws/credentials` 
+
+```
+[default]
+aws_access_key_id = YOUR_ACCESS_KEY
+aws_secret_access_key = YOUR_SECRET_KEY
+```
+
+Also we should configure our default region 
+
+```
+[default]
+region=us-east-1
+```
+
+alternitivley you can configure the AWS CLI by running the following
+ 
+```
+$ aws configure 
+```
+
+## Configuration parameters
+Configure these enviroment variables before you execute the script
+```
+$ export VAR=VAL
+```
+
+ - RDS_INSTANCE -- The identifier for your RDS instance example `"test-01"`
+ - KMS_KEY (Optional) -- If you heve a KMS key you wish to use to encrypt your snapshot please refference the ID here. If not the program will create you a key called `"auto-gen-<random-string>"`
+
+
 
 
