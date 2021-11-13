@@ -13,10 +13,8 @@ if rds_instance == "":
     print("Please set the enviroment variable $RDS_INSTANCE")
     
 
-
 rds = boto3.client('rds')
 kms = boto3.client('kms')
-
 
 def produce_snapshot(instance):
     """Create a snapshot of a desired RDS instance, name that snapshot"""
@@ -35,11 +33,11 @@ def encrypt_snapshot(source_snapshot):
     encrypt = rds.copy_db_snapshot(
         SourceDBSnapshotIdentifier=source_snapshot,
         TargetDBSnapshotIdentifier=f"encrypted-{source_snapshot}",
-        KmsKeyId=,
+        KmsKeyId="",
         CopyTags=True,
         OptionGroupName='string',
         TargetCustomAvailabilityZone='string',
-        SourceRegion='string'
+        SourceRegion='string',
     )
     
     return encrypt
