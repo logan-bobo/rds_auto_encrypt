@@ -2,22 +2,6 @@
 import os
 import boto3
 
-# Convert the value of our OS level environment variables to python variables
-rds_instance = os.getenv('RDS_INSTANCE')
-user_kms_key = os.getenv('KMS_KEY')
-
-# Check the user has configured their environment variables
-if user_kms_key == "":
-    user_kms_key = "SCRIPT-KEY"
-if rds_instance == "":
-    print("Please set the environment variable $RDS_INSTANCE")
-    
-
-# Initialize our boto3 endpoints
-rds = boto3.client('rds')
-kms = boto3.client('kms')
-
-
 def produce_snapshot(instance):
     """Create a snapshot of a desired RDS instance, name that snapshot"""
 
@@ -50,6 +34,22 @@ def encrypt_snapshot(source_snapshot):
 
 
 if __name__ == "__main__":
+    
+    # Convert the value of our OS level environment variables to python variables
+    rds_instance = os.getenv('RDS_INSTANCE')
+    user_kms_key = os.getenv('KMS_KEY')
+
+    # Check the user has configured their environment variables
+    if user_kms_key == "":
+        user_kms_key = "SCRIPT-KEY"
+    if rds_instance == "":
+        print("Please set the environment variable $RDS_INSTANCE")
+        
+
+    # Initialize our boto3 endpoints
+    rds = boto3.client('rds')
+    kms = boto3.client('kms')
+
     produce_snapshot(rds_instance)
 
 
