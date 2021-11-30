@@ -1,5 +1,5 @@
 # RDS Encrypt
-A tool used to encrypt RDS instances that were previously created with an unencrypted EBS volume
+A tool used to encrypt RDS instances that were previously created in an unencrypted state 
 
 Currently it is a strenuous process to encrypt an unencrypted RDS instance. This tool automates that process. It will even handle the process of creating an encryption key in AWS KMS should you not provide one to the script.
 
