@@ -51,6 +51,6 @@ export VAR=VAL
 - RDS_INSTANCE
   - The identifier for your RDS instance example `"test-01"`
 - KMS_KEY (Optional)
-  - If you have a KMS key you wish to use to encrypt your snapshot please reference the ID here. If not the program will create you a key called `"auto-gen-rds-encrypt-<random-string>"`
+  - If you have a KMS key you wish to use to encrypt your snapshot please reference the ID here. If not the program will create a key for you. 
 - DELETE_OLD
   - If set to true your original un-encrypted instance will be removed.
