@@ -2,14 +2,14 @@
 
 A tool used to encrypt RDS instances that were previously created in an unencrypted state
 
-Currently it is a strenuous process to encrypt an unencrypted RDS instance. This tool automates that process. It will even handle the process of creating an encryption key in AWS KMS should you not provide one to the script.
+Currently it is a strenuous process to encrypt an unencrypted RDS instance. This tool automates that process.
 
 ## The following actions are taken in your AWS account
 
 - Snapshot your desired instance
 - Name the snapshot
 - Copy the snapshot to the region your RDS instance currently exists in
-- Encrypt the snapshot on copy with an encryption key
+- Encrypt the snapshot on copy with your encryption key
 - Rename your instance to `"RDS-OLD"`
 - Create a new encrypted instance with the original name using the encrypted snapshot
 - point any Route 53 records pointing to the old endpoint to the new
@@ -48,9 +48,9 @@ Configure these environment variables before you execute the script
 export VAR=VAL
 ```
 
-- RDS_INSTANCE
+- RDS_INSTANCE (REQUIRED)
   - The identifier for your RDS instance example `"test-01"`
-- KMS_KEY (Optional)
-  - If you have a KMS key you wish to use to encrypt your snapshot please reference the ID here. If not the program will create a key for you. 
-- DELETE_OLD
+- KMS_KEY (REQUIRED)
+  - The ID of the encryption key to be used to encrypt your instance. If you need to create a key please see the [following](<https://www.google.com/search?q=create+a+kms+key+aws&oq=create+a+kms+key+aws&aqs=chrome..69i57j0i22i30j69i60l2.5186j0j4&sourceid=chrome&ie=UTF-8>).
+- DELETE_OLD (REQUIRED)
   - If set to true your original un-encrypted instance will be removed.

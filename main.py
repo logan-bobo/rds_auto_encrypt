@@ -14,26 +14,6 @@ def check_kms (key: str):
 
     return check_key["KeyMetadata"]["KeyId"]
 
-def create_kms_key():
-    """ Create a KMS CMK key and hand the ID back"""
-
-    create_key = KMS.create_key(
-        Description='Auto Created key from rds-encrypt python script',
-        KeyUsage='ENCRYPT_DECRYPT',
-        KeySpec='RSA_4096',
-        Origin='AWS_KMS',
-        BypassPolicyLockoutSafetyCheck=False,
-        Tags=[
-            {
-                'TagKey': 'CreatedBy',
-                'TagValue': 'rds-encrypt'
-            },
-        ],
-        MultiRegion=False
-    )
-
-    return create_key["KeyMetadata"]["KeyId"]
-
 def check_snapshot(instance: str):
     """ Check for the existence of a database snapshot"""
     check_rds = RDS.describe_db_snapshots(
@@ -43,7 +23,7 @@ def check_snapshot(instance: str):
 
     return check_rds
 
-def check_snapshot_state(snapshot: str):
+def check_snapshot_state(snapshot: str, ):
     """ Check the state of a snapshot"""
     check_state = RDS.describe_db_snapshots(
         DBInstanceIdentifier=f"{snapshot}",
@@ -51,6 +31,16 @@ def check_snapshot_state(snapshot: str):
     )
 
     return check_state["DBSnapshots"][0]["Status"]
+
+def check_encrypted_snapshot_state(snapshot: str, ):
+    """ Check the state of a snapshot"""
+    check_state = RDS.describe_db_snapshots(
+        DBInstanceIdentifier=f"{snapshot}",
+        DBSnapshotIdentifier=f"encrypted-snapshot-{snapshot}"
+    )
+
+    return check_state["DBSnapshots"][0]["Status"]
+
 
 def produce_snapshot(instance: str):
     """Create a snapshot of a desired RDS instance, name that snapshot"""
@@ -64,7 +54,7 @@ def produce_snapshot(instance: str):
             DBSnapshotIdentifier=f"snapshot-{instance}",
             DBInstanceIdentifier=instance,
         )
-        print("Created base snapshot")
+        print(f"Creating snapshot - snapshot-{instance}")
     else:
         # If the snapshot exists notify the user and they can check their AWS snapshots for this
         # DB instance.
@@ -80,16 +70,15 @@ def encrypt_snapshot(source_snapshot: str, key: str):
         
     encrypt = RDS.copy_db_snapshot(
         SourceDBSnapshotIdentifier=f"{source_snapshot}",
-        TargetDBSnapshotIdentifier=f"{source_snapshot}-encrypted",
+        TargetDBSnapshotIdentifier=f"encrypted-{source_snapshot}",
         KmsKeyId=key,
     )
 
-    print(f"Created encrypted snapshot - {source_snapshot}-encrypted")
+    print(f"Creating encrypted snapshot - encrypted-{source_snapshot}")
 
     return encrypt
 
 if __name__ == "__main__":
-    # Convert the value of our OS level environment variables to python variables
 
     # Initialize our boto3 endpoints
     RDS = boto3.client('rds')
@@ -102,7 +91,7 @@ if __name__ == "__main__":
         print("Please set the 'RDS_INSTANCE' environment variable, see README.md")
         sys.exit(1)
 
-    # Get the KMS_KEY environment variable from the OS if it is not set create key for the user
+    # Get the KMS_KEY environment variable from the OS and check that the key exists
     kms_key = os.getenv('KMS_KEY')
     if kms_key:
         key_existence = check_kms(kms_key)
@@ -111,9 +100,6 @@ if __name__ == "__main__":
         else:
             # remove
             print ("I FOUND THE KEY")
-    else:
-        kms_key = create_kms_key()
-        print (f"Created KMS CMK - {kms_key}")
 
     # Create our initial snapshot
     SNAPSHOT_INSTANCE = produce_snapshot(RDS_INSTANCE)
@@ -123,11 +109,29 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # Wait for our snapshot to come available
-    state = check_snapshot_state(RDS_INSTANCE)
+    base_snapshot_state = check_snapshot_state(RDS_INSTANCE)
     
-    while state == "creating":
-        print("Snapshot not ready...")
+    while base_snapshot_state == "creating":
+        print("\t - Snapshot not ready...")
         time.sleep(20)
-        state = check_snapshot_state(RDS_INSTANCE)
+        base_snapshot_state = check_snapshot_state(RDS_INSTANCE)
+    print("Snapshot finished")
+
+    # Encrypt our snapshot by passing in our base snapshot and encryption key
+    encrypt_snapshot(SNAPSHOT_INSTANCE, kms_key)
+
+    # Wait for our encrypted snapshot to be created. 
+    encrypted_snapshot_state = check_encrypted_snapshot_state(RDS_INSTANCE)
+    while encrypted_snapshot_state == "creating":
+        print("\t -Encrypted snapshot not ready...")
+        time.sleep(20)
+        encrypted_snapshot_state = check_encrypted_snapshot_state(RDS_INSTANCE)
+    print("Snapshot finished")
     
-    ENCRYPT_INSTANCE = encrypt_snapshot(SNAPSHOT_INSTANCE, kms_key)
+
+
+
+
+
+
+
