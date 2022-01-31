@@ -5,8 +5,8 @@ import os
 import boto3
 import time
 
-def check_kms (key: str):
-    """Check for the existence of a KMS key"""
+def check_kms(key: str):
+    """Check for the existence of a KMS key. """
 
     check_key = KMS.describe_key(
         KeyId=key,
@@ -14,8 +14,18 @@ def check_kms (key: str):
 
     return check_key["KeyMetadata"]["KeyId"]
 
+def check_database(database: str):
+    """Check for the existence of the RDS instance. """
+
+    check_instance = RDS.describe_db_instances(
+    DBInstanceIdentifier=database,
+    )
+
+    return check_instance["DBInstances"][0]["DBInstanceIdentifier"]
+
 def check_snapshot(instance: str):
-    """ Check for the existence of a database snapshot"""
+    """ Check for the existence of a database snapshot. """
+
     check_rds = RDS.describe_db_snapshots(
     DBInstanceIdentifier=f"{instance}",
     DBSnapshotIdentifier=f"snapshot-{instance}",
@@ -24,7 +34,8 @@ def check_snapshot(instance: str):
     return check_rds
 
 def check_snapshot_state(snapshot: str, ):
-    """ Check the state of a snapshot"""
+    """Check the state of a snapshot. """
+
     check_state = RDS.describe_db_snapshots(
         DBInstanceIdentifier=f"{snapshot}",
         DBSnapshotIdentifier=f"snapshot-{snapshot}"
@@ -33,7 +44,8 @@ def check_snapshot_state(snapshot: str, ):
     return check_state["DBSnapshots"][0]["Status"]
 
 def check_encrypted_snapshot_state(snapshot: str, ):
-    """ Check the state of a snapshot"""
+    """Check the state of a snapshot. """
+
     check_state = RDS.describe_db_snapshots(
         DBInstanceIdentifier=f"{snapshot}",
         DBSnapshotIdentifier=f"encrypted-snapshot-{snapshot}"
@@ -43,7 +55,7 @@ def check_encrypted_snapshot_state(snapshot: str, ):
 
 
 def produce_snapshot(instance: str):
-    """Create a snapshot of a desired RDS instance, name that snapshot"""
+    """Create a snapshot of a desired RDS instance, name that snapshot. """
 
     # Check our snapshot does not already exist
     check = check_snapshot(instance)
@@ -66,7 +78,7 @@ def produce_snapshot(instance: str):
     return snapshot["DBSnapshot"]["DBSnapshotIdentifier"]
 
 def encrypt_snapshot(source_snapshot: str, key: str):
-    """Encrypt a existing RDS snapshot"""
+    """Encrypt an existing RDS snapshot. """
         
     encrypt = RDS.copy_db_snapshot(
         SourceDBSnapshotIdentifier=f"{source_snapshot}",
@@ -87,19 +99,24 @@ if __name__ == "__main__":
     # Get the RDS_INSTANCE environment variable from the OS if it does not exist prompt the user to 
     # set it and return exit code 1
     RDS_INSTANCE = os.getenv('RDS_INSTANCE')
-    if RDS_INSTANCE == '':
+    if RDS_INSTANCE:
+        rds_existence = check_database(RDS_INSTANCE)
+        if rds_existence == None:
+            print("Please set the 'RDS_INSTANCE' environment variable, see README.md")
+            sys.exit(1)
+    else:
         print("Please set the 'RDS_INSTANCE' environment variable, see README.md")
-        sys.exit(1)
+
 
     # Get the KMS_KEY environment variable from the OS and check that the key exists
     kms_key = os.getenv('KMS_KEY')
     if kms_key:
         key_existence = check_kms(kms_key)
-        if key_existence == '':
-            print("Are you sure you have provided the correct key id?")
-        else:
-            # remove
-            print ("I FOUND THE KEY")
+        if key_existence == None:
+            print("Please set the 'KMS_KEY' environment variable, see README.md")
+            sys.exit(1)
+    else:
+        print("Please set the 'KMS_KEY' environment variable, see README.md")
 
     # Create our initial snapshot
     SNAPSHOT_INSTANCE = produce_snapshot(RDS_INSTANCE)

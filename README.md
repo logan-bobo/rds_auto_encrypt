@@ -1,4 +1,4 @@
-# RDS Encrypt
+# RDS Encrypt 🔒
 
 A tool used to encrypt RDS instances that were previously created in an unencrypted state
 
@@ -48,9 +48,9 @@ Configure these environment variables before you execute the script
 export VAR=VAL
 ```
 
-- RDS_INSTANCE (REQUIRED)
+- RDS_INSTANCE
   - The identifier for your RDS instance example `"test-01"`
-- KMS_KEY (REQUIRED)
+- KMS_KEY
   - The ID of the encryption key to be used to encrypt your instance. If you need to create a key please see the [following](<https://www.google.com/search?q=create+a+kms+key+aws&oq=create+a+kms+key+aws&aqs=chrome..69i57j0i22i30j69i60l2.5186j0j4&sourceid=chrome&ie=UTF-8>).
-- DELETE_OLD (REQUIRED)
+- DELETE_OLD
   - If set to true your original un-encrypted instance will be removed.
