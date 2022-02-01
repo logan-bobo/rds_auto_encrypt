@@ -12,8 +12,7 @@ Currently it is a strenuous process to encrypt an unencrypted RDS instance. This
 - Encrypt the snapshot on copy with your encryption key
 - Rename your instance to `"RDS-OLD"`
 - Create a new encrypted instance with the original name using the encrypted snapshot
-- point any Route 53 records pointing to the old endpoint to the new
-- Remove the old RDS instance (optional)
+- Remove the old RDS instance
 
 Where you once had an unencrypted RDS instance is a newly created, encrypted instance that is a replica of the original and all of the data held.
 
@@ -52,5 +51,5 @@ export VAR=VAL
   - The identifier for your RDS instance example `"test-01"`
 - KMS_KEY
   - The ID of the encryption key to be used to encrypt your instance. If you need to create a key please see the [following](<https://www.google.com/search?q=create+a+kms+key+aws&oq=create+a+kms+key+aws&aqs=chrome..69i57j0i22i30j69i60l2.5186j0j4&sourceid=chrome&ie=UTF-8>).
-- DELETE_OLD
-  - If set to true your original un-encrypted instance will be removed.
+- DNS_RECORD (optional)
+  - Must be the current record of type CNAME that is pointing to your current RDS endpoint.

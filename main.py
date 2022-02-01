@@ -4,6 +4,7 @@ import sys
 import os
 import boto3
 import time
+import random
 
 def check_kms(key: str):
     """Check for the existence of a KMS key. """
@@ -90,6 +91,29 @@ def encrypt_snapshot(source_snapshot: str, key: str):
 
     return encrypt
 
+def rename_instance(instance: str):
+    random_prefix_int = random.randint(1000, 9999)
+    instance_new = f"rds-old-{random_prefix_int}-instance"
+
+    print(f"Renaming instance - {instance_new}")
+    rename = RDS.modify_db_instance(
+    DBInstanceIdentifier=instance,
+    NewDBInstanceIdentifier=instance_new,
+    )
+
+    if rename["PendingModifiedValues"]["DBInstanceIdentifier"] != instance_new:
+        print(f"Could not rename RDS instance {instance} to {instance_new}")
+
+    update_check = None
+    while update_check != instance_new:
+        check_database(instance_new)
+        print("\t - Rename not complete")
+
+    print("Rename complete")
+
+    
+
+
 if __name__ == "__main__":
 
     # Initialize our boto3 endpoints
@@ -106,6 +130,7 @@ if __name__ == "__main__":
             sys.exit(1)
     else:
         print("Please set the 'RDS_INSTANCE' environment variable, see README.md")
+        sys.exit(1)
 
 
     # Get the KMS_KEY environment variable from the OS and check that the key exists
@@ -117,6 +142,7 @@ if __name__ == "__main__":
             sys.exit(1)
     else:
         print("Please set the 'KMS_KEY' environment variable, see README.md")
+        sys.exit(1)
 
     # Create our initial snapshot
     SNAPSHOT_INSTANCE = produce_snapshot(RDS_INSTANCE)
@@ -140,10 +166,12 @@ if __name__ == "__main__":
     # Wait for our encrypted snapshot to be created. 
     encrypted_snapshot_state = check_encrypted_snapshot_state(RDS_INSTANCE)
     while encrypted_snapshot_state == "creating":
-        print("\t -Encrypted snapshot not ready...")
+        print("\t - Encrypted snapshot not ready...")
         time.sleep(20)
         encrypted_snapshot_state = check_encrypted_snapshot_state(RDS_INSTANCE)
     print("Snapshot finished")
+
+    # Renames the orignal instance RDS-OLD
     
 
 
