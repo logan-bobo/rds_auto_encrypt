@@ -28,7 +28,7 @@ def check_database(database: str):
 
 def remove_db(instance: str):
     """Removes a DB instance based on identifier"""
-    delete = RDS.delete_db_instance(
+    RDS.delete_db_instance(
         DBInstanceIdentifier=instance,
         SkipFinalSnapshot=True|False,
         DeleteAutomatedBackups=False
@@ -204,3 +204,4 @@ if __name__ == "__main__":
         sys.exit(0)
 
     remove_db(OLD_INSTANCE)
+    
