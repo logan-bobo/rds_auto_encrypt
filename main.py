@@ -154,7 +154,6 @@ if __name__ == "__main__":
         print("Please set the 'RDS_INSTANCE' environment variable, see README.md")
         sys.exit(1)
 
-
     # Get the KMS_KEY environment variable from the OS and check that the key exists
     KMS_KEY = os.getenv('KMS_KEY')
     if KMS_KEY:
