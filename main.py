@@ -139,8 +139,8 @@ if __name__ == "__main__":
     # set it and return exit code 1
     RDS_INSTANCE = os.getenv('RDS_INSTANCE')
     if RDS_INSTANCE:
-        RDS_INSTANCE = check_database(RDS_INSTANCE)
-        if RDS_INSTANCE is None:
+        RDS_EXISTENCE = check_database(RDS_INSTANCE)
+        if RDS_EXISTENCE is None:
             print("Please set the 'RDS_INSTANCE' environment variable, see README.md")
             sys.exit(1)
     else:
