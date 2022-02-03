@@ -10,7 +10,6 @@ import boto3
 
 def check_kms(key: str):
     """Check for the existence of a KMS key. """
-
     check_key = KMS.describe_key(
         KeyId=key,
     )
@@ -19,7 +18,6 @@ def check_kms(key: str):
 
 def check_database(database: str):
     """Check for the existence of the RDS instance. """
-
     check_instance = RDS.describe_db_instances(
         DBInstanceIdentifier=database,
     )
@@ -36,7 +34,6 @@ def remove_db(instance: str):
 
 def check_database_encryption(database: str):
     """Checks if an RDS instance has encrypted storage. """
-
     check_instance = RDS.describe_db_instances(
         DBInstanceIdentifier=database,
     )
@@ -45,7 +42,6 @@ def check_database_encryption(database: str):
 
 def check_snapshot(instance: str):
     """ Check for the existence of a database snapshot. """
-
     check_rds = RDS.describe_db_snapshots(
         DBInstanceIdentifier=f"{instance}",
         DBSnapshotIdentifier=f"snapshot-{instance}",
@@ -55,7 +51,6 @@ def check_snapshot(instance: str):
 
 def check_snapshot_state(snapshot: str, ):
     """Check the state of a snapshot. """
-
     check_state = RDS.describe_db_snapshots(
         DBInstanceIdentifier=f"{snapshot}",
         DBSnapshotIdentifier=f"snapshot-{snapshot}"
@@ -65,7 +60,6 @@ def check_snapshot_state(snapshot: str, ):
 
 def check_encrypted_snapshot_state(snapshot: str, ):
     """Check the state of a snapshot. """
-
     check_state = RDS.describe_db_snapshots(
         DBInstanceIdentifier=f"{snapshot}",
         DBSnapshotIdentifier=f"encrypted-snapshot-{snapshot}"
@@ -92,7 +86,6 @@ def produce_snapshot(instance: str):
 
 def encrypt_snapshot(source_snapshot: str, key: str):
     """Encrypt an existing RDS snapshot. """
-
     encrypt = RDS.copy_db_snapshot(
         SourceDBSnapshotIdentifier=f"{source_snapshot}",
         TargetDBSnapshotIdentifier=f"encrypted-{source_snapshot}",
