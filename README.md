@@ -39,15 +39,10 @@ alternatively you can configure the AWS CLI by running the following
 aws configure
 ```
 
-## Configuration parameters
+## Script Arguments
 
-Configure these environment variables before you execute the script
+The following arguments can be passed to the script to set your desired instance and KMS key.
 
-```bash
-export VAR='VAL'
-```
-
-- RDS_INSTANCE
-  - The identifier for your RDS instance example `"test-01"`
-- KMS_KEY
-  - The ID of the encryption key to be used to encrypt your instance. If you need to create a key please see the [following](<https://www.google.com/search?q=create+a+kms+key+aws&oq=create+a+kms+key+aws&aqs=chrome..69i57j0i22i30j69i60l2.5186j0j4&sourceid=chrome&ie=UTF-8>).
+- `-instance` the RDS instance you wish to execute the script against
+- `-keyid` the KMS key you wish to use to encrypt your instance with
+- `-h, --help` help for the tool

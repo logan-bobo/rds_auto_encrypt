@@ -135,9 +135,32 @@ if __name__ == "__main__":
     RDS = boto3.client('rds')
     KMS = boto3.client('kms')
 
-    # Get the RDS_INSTANCE environment variable from the OS if it does not exist prompt the user to
-    # set it and return exit code 1
-    RDS_INSTANCE = os.getenv('RDS_INSTANCE')
+    # Initialize argparser and arguments
+    PARSER = argparse.ArgumentParser(description='Encrypt an RDS instance')
+    PARSER.add_argument(
+                        '--instance', 
+                        '-i', 
+                        metavar='instance-1',  
+                        action='store',
+                        dest='instance',
+                        type=str,
+                        help='Your desired RDS instance',
+                        required=True
+                        )
+    PARSER.add_argument(
+                        '--keyid', 
+                        '-k', 
+                        metavar='key-1', 
+                        action='store',
+                        dest='keyid',
+                        type=str,
+                        help='Your desired KMS key',
+                        required=True
+                        )
+    ARGS = PARSER.parse_args()
+
+    # Checks for our RDS_INSTANCE parameter 
+    RDS_INSTANCE = ARGS.instance
     if RDS_INSTANCE:
         RDS_EXISTENCE = check_database(RDS_INSTANCE)
         if RDS_EXISTENCE is None:
@@ -147,8 +170,8 @@ if __name__ == "__main__":
         print("Please set the 'RDS_INSTANCE' environment variable, see README.md")
         sys.exit(1)
 
-    # Get the KMS_KEY environment variable from the OS and check that the key exists
-    KMS_KEY = os.getenv('KMS_KEY')
+    # Checks for our RDS_INSTANCE parameter 
+    KMS_KEY = ARGS.keyid
     if KMS_KEY:
         KEY_EXISTENCE = check_kms(KMS_KEY)
         if KEY_EXISTENCE is None:
