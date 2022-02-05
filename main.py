@@ -7,8 +7,9 @@ import random
 import sys
 import os
 import boto3
+import argparse
 
-def check_kms(key: str):
+def check_kms(key: str) -> str:
     """Check for the existence of a KMS key. """
     check_key = KMS.describe_key(
         KeyId=key,
@@ -16,7 +17,7 @@ def check_kms(key: str):
 
     return check_key["KeyMetadata"]["KeyId"]
 
-def check_database(database: str):
+def check_database(database: str) -> str:
     """Check for the existence of the RDS instance. """
     check_instance = RDS.describe_db_instances(
         DBInstanceIdentifier=database,
@@ -24,15 +25,15 @@ def check_database(database: str):
 
     return check_instance["DBInstances"][0]["DBInstanceIdentifier"]
 
-def remove_db(instance: str):
+def remove_db(instance: str) -> None:
     """Removes a DB instance based on identifier"""
     RDS.delete_db_instance(
         DBInstanceIdentifier=instance,
-        SkipFinalSnapshot=True|False,
+        SkipFinalSnapshot=True,
         DeleteAutomatedBackups=False
     )
 
-def check_database_encryption(database: str):
+def check_database_encryption(database: str) -> str:
     """Checks if an RDS instance has encrypted storage. """
     check_instance = RDS.describe_db_instances(
         DBInstanceIdentifier=database,
@@ -40,7 +41,7 @@ def check_database_encryption(database: str):
 
     return check_instance["DBInstances"][0]["StorageEncrypted"]
 
-def check_snapshot(instance: str):
+def check_snapshot(instance: str) -> str:
     """ Check for the existence of a database snapshot. """
     check_rds = RDS.describe_db_snapshots(
         DBInstanceIdentifier=f"{instance}",
@@ -49,7 +50,7 @@ def check_snapshot(instance: str):
 
     return check_rds
 
-def check_snapshot_state(snapshot: str, ):
+def check_snapshot_state(snapshot: str) -> str:
     """Check the state of a snapshot. """
     check_state = RDS.describe_db_snapshots(
         DBInstanceIdentifier=f"{snapshot}",
@@ -58,7 +59,7 @@ def check_snapshot_state(snapshot: str, ):
 
     return check_state["DBSnapshots"][0]["Status"]
 
-def check_encrypted_snapshot_state(snapshot: str, ):
+def check_encrypted_snapshot_state(snapshot: str) -> str:
     """Check the state of a snapshot. """
     check_state = RDS.describe_db_snapshots(
         DBInstanceIdentifier=f"{snapshot}",
@@ -67,8 +68,7 @@ def check_encrypted_snapshot_state(snapshot: str, ):
 
     return check_state["DBSnapshots"][0]["Status"]
 
-
-def produce_snapshot(instance: str):
+def produce_snapshot(instance: str) -> str:
     """Create a snapshot of a desired RDS instance, name that snapshot. """
     check = check_snapshot(instance)
 
@@ -80,11 +80,11 @@ def produce_snapshot(instance: str):
         print(f"Creating snapshot - snapshot-{instance}")
     else:
         print(f"Snapshot already exists at 'snapshot-{instance}'")
-        return None
+        sys.exit(1)
 
     return snapshot["DBSnapshot"]["DBSnapshotIdentifier"]
 
-def encrypt_snapshot(source_snapshot: str, key: str):
+def encrypt_snapshot(source_snapshot: str, key: str) -> str:
     """Encrypt an existing RDS snapshot. """
     encrypt = RDS.copy_db_snapshot(
         SourceDBSnapshotIdentifier=f"{source_snapshot}",
@@ -95,7 +95,7 @@ def encrypt_snapshot(source_snapshot: str, key: str):
     print(f"Creating encrypted snapshot - encrypted-{source_snapshot}")
     return encrypt["DBSnapshot"]["DBSnapshotIdentifier"]
 
-def rename_instance(instance: str):
+def rename_instance(instance: str) -> str:
     """Will rename your RDS instance to have a prefix of rds-old-xxxx"""
     random_prefix_int = random.randint(1000, 9999)
     instance_new = f"rds-old-{random_prefix_int}-instance"
@@ -141,7 +141,7 @@ if __name__ == "__main__":
     if RDS_INSTANCE:
         RDS_EXISTENCE = check_database(RDS_INSTANCE)
         if RDS_EXISTENCE is None:
-            print("Please set the 'RDS_INSTANCE' environment variable, see README.md")
+            print("Could not find your selected RDS instance please ensure it exists")
             sys.exit(1)
     else:
         print("Please set the 'RDS_INSTANCE' environment variable, see README.md")
@@ -160,10 +160,6 @@ if __name__ == "__main__":
 
     # Create our initial snapshot
     SNAPSHOT_INSTANCE = produce_snapshot(RDS_INSTANCE)
-
-    # Catch if SNAPSHOT_INSTANCE found the snapshot already existed
-    if SNAPSHOT_INSTANCE is None:
-        sys.exit(1)
 
     # Wait for our snapshot to come available
     BASE_SNAPSHOT_STATE = check_snapshot_state(RDS_INSTANCE)
@@ -193,7 +189,7 @@ if __name__ == "__main__":
     # Check we now have a new encrypted instance running under the original identifier
     if check_database_encryption(RDS_INSTANCE):
         print(f"Instance {RDS_INSTANCE} is now encrypted")
-        sys.exit(0)
 
+    # Remove the old database instance
     remove_db(OLD_INSTANCE)
-    
+    sys.exit(0)
