@@ -135,7 +135,7 @@ if __name__ == "__main__":
     RDS = boto3.client('rds')
     KMS = boto3.client('kms')
 
-    # Initialize argparser
+    # Initialize argparser and arguments
     PARSER = argparse.ArgumentParser(description='Encrypt an RDS instance')
     PARSER.add_argument(
                         '--instance', 
@@ -157,9 +157,9 @@ if __name__ == "__main__":
                         help='Your desired KMS key',
                         required=True
                         )
-
     ARGS = PARSER.parse_args()
 
+    # Checks for our RDS_INSTANCE parameter 
     RDS_INSTANCE = ARGS.instance
     if RDS_INSTANCE:
         RDS_EXISTENCE = check_database(RDS_INSTANCE)
@@ -170,6 +170,7 @@ if __name__ == "__main__":
         print("Please set the 'RDS_INSTANCE' environment variable, see README.md")
         sys.exit(1)
 
+    # Checks for our RDS_INSTANCE parameter 
     KMS_KEY = ARGS.keyid
     if KMS_KEY:
         KEY_EXISTENCE = check_kms(KMS_KEY)
