@@ -1,4 +1,4 @@
-# RDS Encrypt 🔒
+# RDS Auto Encrypt 🔒
 
 A tool used to encrypt RDS instances that were previously created in an unencrypted state
 
