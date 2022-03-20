@@ -166,7 +166,7 @@ if __name__ == "__main__":
     if RDS_INSTANCE:
         RDS_EXISTENCE = check_database(RDS_INSTANCE)
         if RDS_EXISTENCE is None:
-            print("Could not find your selected RDS instance please ensure it exists")
+            sys.stderr.write("Could not find your selected RDS instance please ensure it exists")
             sys.exit(1)
 
     # Check the KMS key exists
@@ -174,7 +174,7 @@ if __name__ == "__main__":
     if KMS_KEY:
         KEY_EXISTENCE = check_kms(KMS_KEY)
         if KEY_EXISTENCE is None:
-            print("Could not find your KMS key please ensure it exists")
+            sys.stderr.write("Could not find your KMS key please ensure it exists")
             sys.exit(1)
 
     # Create our initial snapshot
