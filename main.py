@@ -3,11 +3,13 @@
 """ A tool used for encrypting RDS instances that were previously created in an unencrypted state"""
 
 import time
+import sys
+import time
 import random
 import sys
-import os
 import boto3
 import argparse
+
 
 def check_kms(key: str) -> str:
     """Check for the existence of a KMS key. """
@@ -159,27 +161,21 @@ if __name__ == "__main__":
                         )
     ARGS = PARSER.parse_args()
 
-    # Checks for our RDS_INSTANCE parameter 
+    # Check the RDS instance exists
     RDS_INSTANCE = ARGS.instance
     if RDS_INSTANCE:
         RDS_EXISTENCE = check_database(RDS_INSTANCE)
         if RDS_EXISTENCE is None:
             print("Could not find your selected RDS instance please ensure it exists")
             sys.exit(1)
-    else:
-        print("Please set the 'RDS_INSTANCE' environment variable, see README.md")
-        sys.exit(1)
 
-    # Checks for our RDS_INSTANCE parameter 
+    # Check the KMS key exists
     KMS_KEY = ARGS.keyid
     if KMS_KEY:
         KEY_EXISTENCE = check_kms(KMS_KEY)
         if KEY_EXISTENCE is None:
-            print("Please set the 'KMS_KEY' environment variable, see README.md")
+            print("Could not find your KMS key please ensure it exists")
             sys.exit(1)
-    else:
-        print("Please set the 'KMS_KEY' environment variable, see README.md")
-        sys.exit(1)
 
     # Create our initial snapshot
     SNAPSHOT_INSTANCE = produce_snapshot(RDS_INSTANCE)
