@@ -11,10 +11,7 @@ class TestClass(unittest.TestCase):
 
     """main test class for rds_auto_encrypt"""
 
-
-    @mock.patch(
-        "check_kms.check_key", return_value={"KeyMetadata": {"KeyId": "123"}}
-    )
+    @mock.patch("check_kms.check_key", return_value={"KeyMetadata": {"KeyId": "123"}})
     def test_check_kms():
         expected = "123"
         acctual = check_kms(expected)
