@@ -1,5 +1,7 @@
 # RDS Auto Encrypt 🔒
 
+![CI](https://github.com/logan-bobo/rds_auto_encrypt/actions/workflows/python-app.yml/badge.svg)
+
 A tool used to encrypt RDS instances that were previously created in an unencrypted state
 
 Currently it is a strenuous process to encrypt an unencrypted RDS instance. This tool automates that process.
