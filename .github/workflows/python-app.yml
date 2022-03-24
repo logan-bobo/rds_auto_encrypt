@@ -31,5 +31,5 @@ jobs:
         python -m black --check .
     - name: Test with unittest
       run: |
-        python -m pytest 
+        python -m unittest 
         
