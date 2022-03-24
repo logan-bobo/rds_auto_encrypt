@@ -135,7 +135,7 @@ def rename_instance(instance: str) -> str:
     return instance_new
 
 
-def restore_from_encrypted_snapshot(snapshot: str, instance_name: str):
+def restore_from_encrypted_snapshot(snapshot: str, instance_name: str) -> None:
     """Restores an RDS instance from a given snapshot"""
     RDS.restore_db_instance_from_db_snapshot(
         DBInstanceIdentifier=instance_name,
