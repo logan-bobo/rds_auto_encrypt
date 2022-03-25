@@ -48,3 +48,13 @@ The following arguments can be passed to the script to set your desired instance
 - `-instance` the RDS instance you wish to execute the script against
 - `-keyid` the KMS key you wish to use to encrypt your instance with
 - `-h, --help` help for the tool
+
+## Running the script
+
+Frist ensure that the file is executable on your system 
+```bash 
+chmod ug+x test_rds_encrypt.py
+./rds_encrypt.py -instance <instance> -keyis <keyid>
+```
+
+
