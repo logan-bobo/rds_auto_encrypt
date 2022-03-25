@@ -53,8 +53,12 @@ The following arguments can be passed to the script to set your desired instance
 
 Frist ensure that the file is executable on your system 
 ```bash 
-chmod ug+x test_rds_encrypt.py
-./rds_encrypt.py -instance <instance> -keyis <keyid>
+$ chmod ug+x test_rds_encrypt.py
+```
+
+Now you are able to execute the script 
+```
+$ ./rds_encrypt.py -instance <instance> -keyis <keyid>
 ```
 
 
