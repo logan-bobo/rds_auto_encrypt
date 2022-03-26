@@ -58,7 +58,5 @@ $ chmod ug+x test_rds_encrypt.py
 
 Now you are able to execute the script 
 ```
-$ ./rds_encrypt.py -instance <instance> -keyis <keyid>
+$ ./rds_encrypt.py --instance <instance> --keyis <keyid>
 ```
-
-

@@ -3,12 +3,10 @@
 import unittest
 from unittest.mock import Mock
 from rds_encrypt import (
-    check_encrypted_snapshot_state,
     check_kms,
     check_database,
     check_database_encryption,
     check_snapshot,
-    check_snapshot_state,
     encrypt_snapshot,
     produce_snapshot,
     rename_instance,
@@ -49,24 +47,6 @@ class TestClass(unittest.TestCase):
     def test_check_snapshot():
         expected = "True"
         acctual = check_snapshot("value")
-        assert expected == acctual
-
-    @mock.patch(
-        "check_snapshot_state.check_state",
-        return_value={"DBSnapshots": [{"status": "done"}]},
-    )
-    def test_check_snapshot_state():
-        expected = "done"
-        acctual = check_snapshot_state("value")
-        assert expected == acctual
-
-    @mock.patch(
-        "check_encrypted_snapshot_state.check_state",
-        return_value={"DBSnapshots": [{"Status": "Done"}]},
-    )
-    def test_check_encrypted_snapshot_state():
-        expected = "Done"
-        acctual = check_encrypted_snapshot_state("val")
         assert expected == acctual
 
     @mock.patch(
