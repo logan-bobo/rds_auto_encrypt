@@ -57,25 +57,6 @@ def check_snapshot(instance: str) -> str:
     return check_rds
 
 
-def check_snapshot_state(snapshot: str) -> str:
-    """Check the state of a snapshot."""
-    check_state = RDS.describe_db_snapshots(
-        DBInstanceIdentifier=f"{snapshot}", DBSnapshotIdentifier=f"snapshot-{snapshot}"
-    )
-
-    return check_state["DBSnapshots"][0]["Status"]
-
-
-def check_encrypted_snapshot_state(snapshot: str) -> str:
-    """Check the state of a snapshot."""
-    check_state = RDS.describe_db_snapshots(
-        DBInstanceIdentifier=f"{snapshot}",
-        DBSnapshotIdentifier=f"encrypted-snapshot-{snapshot}",
-    )
-
-    return check_state["DBSnapshots"][0]["Status"]
-
-
 def produce_snapshot(instance: str) -> str:
     """Create a snapshot of a desired RDS instance, name that snapshot."""
     check = check_snapshot(instance)
@@ -85,7 +66,6 @@ def produce_snapshot(instance: str) -> str:
             DBSnapshotIdentifier=f"snapshot-{instance}",
             DBInstanceIdentifier=instance,
         )
-        print(f"Creating snapshot - snapshot-{instance}")
     else:
         print(f"Snapshot already exists at 'snapshot-{instance}'")
         sys.exit(1)
@@ -121,7 +101,7 @@ def rename_instance(instance: str) -> str:
         rename["DBInstance"]["PendingModifiedValues"]["DBInstanceIdentifier"]
         != instance_new
     ):
-        print(f"Could not rename RDS instance {instance} to {instance_new}")
+        sys.stderr.write(f"Could not rename RDS instance {instance} to {instance_new}")
 
     update_check = None
     while update_check != instance_new:
@@ -192,26 +172,27 @@ if __name__ == "__main__":
             sys.exit(1)
 
     # Create our initial snapshot
-    SNAPSHOT_INSTANCE = produce_snapshot(RDS_INSTANCE)
+    BASE_SNAPSHOT_IDENTIFIER = produce_snapshot(RDS_INSTANCE)
+    print(f"Creating snapshot - {BASE_SNAPSHOT_IDENTIFIER}")
 
     # Wait for our snapshot to come available
-    BASE_SNAPSHOT_STATE = check_snapshot_state(RDS_INSTANCE)
-    while BASE_SNAPSHOT_STATE == "creating":
-        print("\t - Snapshot not ready...")
-        time.sleep(20)
-        BASE_SNAPSHOT_STATE = check_snapshot_state(RDS_INSTANCE)
-    print("Snapshot finished")
+    BASE_SNAPSHOT_WAITER = RDS.get_waiter("db_snapshot_available")
+    BASE_SNAPSHOT_WAITER.wait(
+        DBInstanceIdentifier=f"{RDS_INSTANCE}",
+        DBSnapshotIdentifier=f"{BASE_SNAPSHOT_IDENTIFIER}",
+        WaiterConfig={"Delay": 30, "MaxAttempts": 120},
+    )
 
     # Encrypt our snapshot by passing in our base snapshot and encryption key
-    ENCRYPTED_SNAPSHOT_IDENTIFIER = encrypt_snapshot(SNAPSHOT_INSTANCE, KMS_KEY)
+    ENCRYPTED_SNAPSHOT_IDENTIFIER = encrypt_snapshot(BASE_SNAPSHOT_IDENTIFIER, KMS_KEY)
 
     # Wait for our encrypted snapshot to be created.
-    ENCRYPTED_SNAPSHOT_STATE = check_encrypted_snapshot_state(RDS_INSTANCE)
-    while ENCRYPTED_SNAPSHOT_STATE == "creating":
-        print("\t - Encrypted snapshot not ready...")
-        time.sleep(20)
-        ENCRYPTED_SNAPSHOT_STATE = check_encrypted_snapshot_state(RDS_INSTANCE)
-    print("Snapshot finished")
+    ENCRYPTED_SNAPSHOT_WAITER = RDS.get_waiter("db_snapshot_available")
+    ENCRYPTED_SNAPSHOT_WAITER.wait(
+        DBInstanceIdentifier=f"{RDS_INSTANCE}",
+        DBSnapshotIdentifier=f"{ENCRYPTED_SNAPSHOT_IDENTIFIER}",
+        WaiterConfig={"Delay": 30, "MaxAttempts": 120},
+    )
 
     # Renames the original instance RDS-OLD
     OLD_INSTANCE = rename_instance(RDS_INSTANCE)
