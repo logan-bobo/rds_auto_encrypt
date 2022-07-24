@@ -3,8 +3,6 @@
 """ A tool used for encrypting RDS instances that were previously created in an unencrypted state"""
 
 import time
-import sys
-import time
 import random
 import sys
 import boto3
